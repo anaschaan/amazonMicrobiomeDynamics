@@ -1,0 +1,22 @@
+############################################
+############# Strain Profiling #############
+############################################
+
+# Population-level diversity analyses were performed using InStrain
+
+# Join all dereplicated bins from each individual
+for i in *drep; do cat sequence/dereplicated_genomes/*.fa >> allbins-sequence.fa; done
+
+# Index, align and sort bins
+bowtie2-build allbins-sequence.fa allbins-sequence.fa
+bowtie2 --threads 40 -x allbins-sequence.fa -1 sequence_1u_paired.fq.gz -2 sequence_2u_paired.fq.gz | samtools view -@ 40 -bS - > sequence_bins_map.bam
+samtools sort sequence_bins_map.bam -o sequence_bins_map.sorted.bam
+
+# Detailed information on inStrain input and expected output can be found here: https://instrain.readthedocs.io/en/master/user_manual.html#
+
+# Create a scaffold-to-bin file (script from inStrain)
+parse_stb.py --reverse -f sequence-drep/dereplicated_genomes/*.fa -o rep_bins_sequence.stb
+
+# Run inStrain profile, and then inStrain compare outputs from each time point
+inStrain profile sequence_bins_map.sorted.bam all-bins-sequence.fa -s rep_bins-sequence.stb -o sequence_instrain 
+inStrain compare -i sequence_instrain/ sequence_T2_instrain/ -o compare-sequence_timepoints -s rep_bins_sequence_timepoints.stb
