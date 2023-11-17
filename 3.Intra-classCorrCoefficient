@@ -2,13 +2,17 @@
 ### Intra-class Correlation Coefficient Analysis ###
 ####################################################
 
+# Load R package
 
-# 'Abundance' is an object of class 'data.frame' that contains the following columns: 'SampleID', 'Individual', 'Timepoint', and species. Values in each species column is given as log abundances. 
+library(lme4)
 
 # Mixed effects model formula:
 Species <- names(Abundance[4:ncol(Abundance)])
 form <- paste(Species,"~ Timepoint + (1|Individual)")
 form
+
+## 'Abundance' is an object of class 'data.frame' that contains the following columns: 'SampleID', 'Individual', 'Timepoint', and species. Values in each species column is given as log abundances. 
+
 
 # Fitting multiple models:
 modList <- lapply(form,lmer,data=Abundance)
