@@ -1,0 +1,22 @@
+#############################################
+############ Metagenome Assembly ############
+#############################################
+
+# De novo genome assembly using the metsSPAdes module of SPAdes v.3.15.3
+SPAdes-3.15.3-Linux/bin/metaspades.py -1 sequence_1u_paired.fq.gz -2 sequence_2u_paired.fq.gz -o spades-assembly-sequence
+
+# Index using Bowtie2 v.2.4.2
+bowtie2-build spades-assembly-sequence/sequence-scaffolds.fasta
+
+# Align and sort contigs using Bowtie v.2.4.2 and Samtools v.1.9
+bowtie2 --threads 40 -x' sequence-scaffolds.fasta -1 sequence_1u_paired.fq.gz -2 sequence_2u_paired.fq.gz | samtools view -@ 40 -bS - > sequence.bowtie.bam
+samtools sort sequence.bowtie.bam -o sequence.sorted.bam
+
+# To cluster genomes into bins using MetaBAT2, first generate a depth file to estimate the coverage of contigs or scaffolds in the metagenome assembly:
+metabat/bin/jgi_summarize_bam_contig_depths --outputDepth sequence_depth.txt sequence.sorted.bam
+
+# Cluster genomes:
+metabat/bin/metabat2 -i sequence-scaffolds.fasta.gz -a sequence_depth.txt -o metabat/sequence-bins
+
+# Dereplicate bins using dRep v.3.2.2 (10% max contamination, 50% minimum completeness)
+dRep dereplicate sequence-drep -g sequence-bins/*.fa -con 10 -comp 50
