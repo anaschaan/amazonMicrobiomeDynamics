@@ -1,0 +1,29 @@
+####################################################
+### Intra-class Correlation Coefficient Analysis ###
+####################################################
+
+
+# 'Abundance' is an object of class 'data.frame' that contains the following columns: 'SampleID', 'Individual', 'Timepoint', and species. Values in each species column is given as log abundances. 
+
+# Mixed effects model formula:
+Species <- names(Abundance[4:ncol(Abundance)])
+form <- paste(Species,"~ Timepoint + (1|Individual)")
+form
+
+# Fitting multiple models:
+modList <- lapply(form,lmer,data=Abundance)
+
+# Extracting the variance components and calculating ICC
+icc_dat <- data.frame()
+for (i in seq_along(modList)) {
+  Result <- as.data.frame(VarCorr(modList[[i]]),comp="Variance")
+  Between_Subjects <- Result$vcov[1] 
+  Within_Subjects <- Result$vcov[2]
+  TOTAL <- sum(res$vcov)
+  ICC <- Between_Subjects/(TOTAL)
+  NAME <- as.character(Result$call)[2]
+  output <- as.data.frame(t(c(NAME,Between_Subjects,Within_Subjects,TOTAL,ICC)))
+  print(output)
+  iccResult <- rbind(icc_dat,output)
+  names(iccres)<-c("Species","Between_Subjects","Within_Subjects","TOTAL","ICC")
+}
