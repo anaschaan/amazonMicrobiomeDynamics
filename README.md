@@ -7,7 +7,6 @@ Command lines are grouped by categories:
   2) Taxonomic classification
   3) Intra-class correlation coefficient analysis
   4) Metagenome assembly
-  5) Funtional annotation
-  6) Strain profiling
+  5) Strain profiling
 
 Requests about these scripts can be sent to Ana Schaan (apschaan@gmail.com).
