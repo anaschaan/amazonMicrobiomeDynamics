@@ -1,0 +1,11 @@
+##############################################
+########## Taxonomic Classification ##########
+##############################################
+
+# Taxonomy assignment with Kraken2 v.2.0.8
+
+kraken2 --db kraken2_gmbc_database --threads 20 --report kraken2/sequence.kreport --paired sequence_1u_paired.fq.gz sequence_2u_paired.fq.gz > kraken2/sequence.kraken2
+
+# Abundance estimation with Bracken v.2.5 at species level
+
+python est_abundance.py -i sequence.kreport -k kraken2_gmbc_database/database150mers.kmer_distrib -l 'S' -t 10 -o sequence_Species.bracken
