@@ -1,0 +1,25 @@
+##############################################
+## Metagenomic Quality Control & Processing ##
+##############################################
+
+# Quality check with FastQC v.0.12.8
+
+fastqc *.fq.gz
+
+# Dereplicate reads with FastUniq v.1.1
+
+fastuniq -i sequence_1.fastq sequence_2.fastq -t q -o sequence_1u.fastq sequence_2u.fastq -c 0
+
+# Quality filtering with Trimmomatic v.0.39
+
+java -jar trimmomatic-0.39.jar PE sequence_1u.fastq.gz sequence_2u.fastq.gz sequence_1u_paired.fq.gz sequence_1u_unpaired.fq.gz sequence_2u_paired.fq.gz sequence_2u_unpaired.fq.gz LEADING:3 TRAILING:3 SLIDINGWINDOW:5:20 MINLEN:50
+
+# Index human genome (version hg 38) using BWA v.0.7.13
+
+bwa index hg38.fa 
+
+# Remove reads that aligned to human sequences using Samtools v.1.9
+
+samtools view -f 12 -F 256 sequence_aligned.sam -o sequence_unmapped.sam
+samtools sort -n ${i}_unmapped.sam -o ${i}_unmapped_sorted.sam
+samtools fastq -@ 8 sequence_unmapped_sorted.sam -1 sequence_1.fastq.gz -2 sequence_2.fastq.gz -0 /dev/null -s /dev/null -n
